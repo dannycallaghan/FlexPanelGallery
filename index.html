@@ -24,6 +24,7 @@
     .panels {
       min-height:100vh;
       overflow: hidden;
+      display: flex;
     }
 
     .panel {
@@ -41,24 +42,38 @@
       font-size: 20px;
       background-size:cover;
       background-position:center;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      display: flex;
+      flex-direction: column;
     }
 
 
-    .panel1 { background-image:url(https://source.unsplash.com/gYl-UtwNg_I/1500x1500); }
-    .panel2 { background-image:url(https://source.unsplash.com/rFKUFzjPYiQ/1500x1500); }
-    .panel3 { background-image:url(https://images.unsplash.com/photo-1465188162913-8fb5709d6d57?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&cs=tinysrgb&w=1500&h=1500&fit=crop&s=967e8a713a4e395260793fc8c802901d); }
-    .panel4 { background-image:url(https://source.unsplash.com/ITjiVXcwVng/1500x1500); }
-    .panel5 { background-image:url(https://source.unsplash.com/3MNzGlQM7qs/1500x1500); }
+    .panel1 { background-image:url(panel1.jpeg); }
+    .panel2 { background-image:url(panel2.jpeg); }
+    .panel3 { background-image:url(panel3.jpeg); }
+    .panel4 { background-image:url(panel4.jpeg); }
+    .panel5 { background-image:url(panel5.jpeg); }
 
     .panel > * {
       margin:0;
       width: 100%;
       transition:transform 0.5s;
+      flex: 1 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
+
+    .panel > *:first-child { transform: translateY(-100%); }
+    .panel.open-active > *:first-child { transform: translateY(0); }
+    .panel > *:last-child { transform: translateY(100%); }
+    .panel.open-active > *:last-child { transform: translateY(0); }
 
     .panel p {
       text-transform: uppercase;
-      font-family: 'Amatic SC', cursive;
+      font-family: 'Amatic SC', cursive, Arial;
       text-shadow:0 0 4px rgba(0, 0, 0, 0.72), 0 0 14px rgba(0, 0, 0, 0.45);
       font-size: 2em;
     }
@@ -68,6 +83,7 @@
 
     .panel.open {
       font-size:40px;
+      flex: 5;
     }
 
   </style>
@@ -102,6 +118,47 @@
   </div>
 
   <script>
+  (() => {
+
+    const panels = document.querySelectorAll('.panel');
+    let previous = null;
+
+    function toggleOpen (e, silent = false) {
+      this.classList.toggle('open');
+      if (!silent) {
+        closePrevious.call(this, e);
+      }
+    }
+
+    function toggleActive (e) {
+      if (!e.propertyName.includes('flex')) { return; }
+      this.classList.toggle('open-active');
+    }
+
+    function closePrevious (e) {
+      if (previous) {
+        removeEvent(previous, 'transitionend', toggleActive)
+        toggleOpen.call(previous, e, true);
+        previous.classList.toggle('open-active');
+        addEvent(previous, 'transitionend', () => {
+          addEvent(previous, 'transitionend', toggleActive);
+        });
+      }
+      previous = this;
+    }
+
+    function addEvent (obj, event, fn) {
+      obj.addEventListener(event, fn);
+    } 
+
+    function removeEvent (obj, event, fn) {
+      obj.removeEventListener(event, fn);
+    } 
+
+    panels.forEach(panel => addEvent(panel, 'click', toggleOpen));
+    panels.forEach(panel => addEvent(panel, 'transitionend', toggleActive));
+
+  })();
 
   </script>
 
